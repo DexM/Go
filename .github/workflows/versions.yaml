@@ -2,7 +2,7 @@ name: Check Discoverability
 on: push
 jobs:
   module-channel:
-    name: Test whether module channel@${{ matrix.version }} is discoverable on Go ${{ matrix.go }}
+    name: Go get dexm.lol/channel@${{ matrix.version }} on Go ${{ matrix.go }}
     strategy:
       matrix:
         go: ["1.18"]
@@ -16,5 +16,5 @@ jobs:
           check-latest: true
       - name: Init temporary module
         run: go mod init tmp
-      - name: Go get channel@${{ matrix.version }}
+      - name: Go get dexm.lol/channel@${{ matrix.version }}
         run: go get dexm.lol/channel@${{ matrix.version }}

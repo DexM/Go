@@ -2,7 +2,7 @@ name: Run Tests
 on: push
 jobs:
   test:
-    name: Test module "${{ matrix.module }}" on Go ${{ matrix.go }}
+    name: Test dexm.lol/${{ matrix.module }} on Go ${{ matrix.go }}
     strategy:
       matrix:
         go: ["1.18"]
