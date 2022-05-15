@@ -2,21 +2,29 @@ package channel
 
 import (
 	"context"
+	"sync"
 )
 
 // Merge multiple channels into a single one.
 func Merge[T any](ctx context.Context, channels ...<-chan T) <-chan T {
+	var wg sync.WaitGroup
+	wg.Add(len(channels))
+
 	res := make(chan T)
+	go func() {
+		wg.Wait()
+		close(res)
+	}()
 
-	go func(res chan<- T) {
-		defer close(res)
+	for _, ch := range channels {
+		go func(ch <-chan T) {
+			defer wg.Done()
 
-		for _, ch := range channels {
 			for msg := range ch {
 				res <- msg
 			}
-		}
-	}(res)
+		}(ch)
+	}
 
 	return res
 }
