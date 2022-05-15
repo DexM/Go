@@ -21,7 +21,11 @@ func Merge[T any](ctx context.Context, channels ...<-chan T) <-chan T {
 			defer wg.Done()
 
 			for msg := range ch {
-				res <- msg
+				select {
+				case res <- msg:
+				case <-ctx.Done():
+					return
+				}
 			}
 		}(ch)
 	}
