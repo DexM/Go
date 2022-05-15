@@ -1,0 +1,20 @@
+name: Check Discoverability
+on: push
+jobs:
+  module-channel:
+    name: Test whether module channel@${{ matrix.version }} is discoverable on Go ${{ matrix.go }}
+    strategy:
+      matrix:
+        go: ["1.18"]
+        version: [latest]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go ${{ matrix.go }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: "~${{ matrix.go }}"
+          check-latest: true
+      - name: Init temporary module
+        run: go mod init tmp
+      - name: Go get channel@${{ matrix.version }}
+        run: go get dexm.lol/channel@${{ matrix.version }}
