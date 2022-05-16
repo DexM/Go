@@ -8,4 +8,5 @@ Various Golang stuff created by me.
 
 | Module | Description |
 | --- | --- |
+| [`dexm.lol/async`](async) | Promise pattern implementation |
 | [`dexm.lol/channel`](channel) | Helpers for easier work with channels |

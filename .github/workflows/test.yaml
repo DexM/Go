@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         go: ["1.18"]
-        module: [channel]
+        module: [async, channel]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
