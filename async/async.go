@@ -1,2 +1,2 @@
-// Package async implements Promise pattern.
+// Package async provides implementation of useful Golang asynchronous patterns.
 package async

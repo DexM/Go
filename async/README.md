@@ -3,7 +3,7 @@
 [![Tests](https://github.com/DexM/Go/actions/workflows/test.yaml/badge.svg)](https://github.com/DexM/Go/actions/workflows/test.yaml)
 [![Go Reference](https://pkg.go.dev/badge/dexm.lol/async.svg)](https://pkg.go.dev/dexm.lol/async)
 
-Promise pattern implementation.
+Implementation of useful Golang asynchronous patterns.
 
 ## Installation
 
