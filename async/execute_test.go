@@ -157,3 +157,40 @@ func TestExecuteLaunchesAsync(t *testing.T) {
 		t.Errorf("Unexpected result received from the promise: %s", res)
 	}
 }
+
+func TestExecuteHandlesPanics(t *testing.T) {
+	promise := async.Execute(func() (interface{}, error) {
+		panic("panic happened")
+	})
+
+	res, err := promise()
+	if err == nil {
+		t.Error("Expected to receive error from the promise")
+	}
+	if err.Error() != "asynchronous function panicked: panic happened" {
+		t.Errorf("Unexpected error received from the promise: %s", err.Error())
+	}
+	if res != nil {
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+}
+
+func TestExecuteHandlesPanicsAndWrapsOriginalError(t *testing.T) {
+	promise := async.Execute(func() (interface{}, error) {
+		panic(errors.New("panic happened"))
+	})
+
+	res, err := promise()
+	if err == nil {
+		t.Error("Expected to receive error from the promise")
+	}
+	if err.Error() != "asynchronous function panicked: panic happened" {
+		t.Errorf("Unexpected error received from the promise: %s", err.Error())
+	}
+	if originalErr := errors.Unwrap(err); originalErr == nil || originalErr.Error() != "panic happened" {
+		t.Errorf("Original error was not properly wrapped: %#v", originalErr)
+	}
+	if res != nil {
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+}

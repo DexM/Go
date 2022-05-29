@@ -1,5 +1,9 @@
 package async
 
+import (
+	"fmt"
+)
+
 // Promise is a function returned by async.Execute function.
 // It can be called later to retrieve result of asynchronous execution.
 type Promise[T any] func() (T, error)
@@ -19,10 +23,28 @@ func Execute[T any](f func() (T, error)) Promise[T] {
 	ch := make(chan executeChMessageType[T], 1)
 
 	go func() {
-		defer close(ch)
+		var msg executeChMessageType[T]
+
+		defer func() {
+			// Panics in goroutines must be handled.
+			// Otherwise caller will receive nothing: no result and no error.
+			if panicArg := recover(); panicArg != nil {
+				if err, ok := panicArg.(error); ok {
+					msg.err = fmt.Errorf("asynchronous function panicked: %w", err)
+				} else {
+					msg.err = fmt.Errorf("asynchronous function panicked: %v", panicArg)
+				}
+			}
+
+			// After potential panic is handled, result can be sent to channel
+			ch <- msg
+			close(ch)
+		}()
 
 		res, err := f()
-		ch <- executeChMessageType[T]{res, err}
+
+		msg.res = res
+		msg.err = err
 	}()
 
 	return func() (T, error) {
