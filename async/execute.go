@@ -22,12 +22,7 @@ func Execute[T any](f func() (T, error)) Promise[T] {
 		defer close(ch)
 
 		res, err := f()
-		if err != nil {
-			ch <- executeChMessageType[T]{err: err}
-			return
-		}
-
-		ch <- executeChMessageType[T]{res: res}
+		ch <- executeChMessageType[T]{res, err}
 	}()
 
 	return func() (T, error) {

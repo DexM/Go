@@ -121,6 +121,23 @@ func TestExecutePassesErrorToPromise(t *testing.T) {
 	}
 }
 
+func TestExecutePassesResultAndErrorToPromiseAtTheSameTime(t *testing.T) {
+	promise := async.Execute(func() (string, error) {
+		return "dummy result", errors.New("dummy error")
+	})
+
+	res, err := promise()
+	if err == nil {
+		t.Error("Expected to receive error from the promise")
+	}
+	if err.Error() != "dummy error" {
+		t.Errorf("Unexpected error received from the promise: %s", err.Error())
+	}
+	if res != "dummy result" {
+		t.Errorf("Unexpected result received from the promise: %s", res)
+	}
+}
+
 func TestExecuteLaunchesAsync(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
