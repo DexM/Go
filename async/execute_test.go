@@ -30,7 +30,7 @@ func ExampleExecute() {
 }
 
 func ExampleExecute_waitGroups() {
-	// Use wait groups to execute multiple asynchronous functions and read results only when all of them succeeded
+	// Use wait groups to execute multiple asynchronous functions and read results only when all of them succeeded.
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -46,7 +46,7 @@ func ExampleExecute_waitGroups() {
 		return 42, nil
 	})
 
-	// Wait for both asynchronous function to complete before getting results
+	// Wait for both asynchronous function to complete before getting results.
 	wg.Wait()
 
 	stringRes, err := promise1()
@@ -61,12 +61,12 @@ func ExampleExecute_waitGroups() {
 }
 
 func ExampleExecute_context() {
-	// Cancel context when main function exits to signal asynchronous function to exit as well
+	// Cancel context when main function exits to signal asynchronous function to exit as well.
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
 	promise := async.Execute(func() (string, error) {
-		// Use context to cancel asynchronous function if base function exits early
+		// Use context to cancel asynchronous function if base function exits early.
 		_, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://example.com/", nil)
 		if err != nil {
 			return "", err
@@ -77,7 +77,7 @@ func ExampleExecute_context() {
 
 	_, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://example.com/", nil)
 	if err != nil {
-		// It is safe to exit this function early, context will abort asynchronous function
+		// It is safe to exit this function early, context will abort asynchronous function.
 		return
 	}
 

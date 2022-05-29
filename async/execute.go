@@ -36,7 +36,7 @@ func Execute[T any](f func() (T, error)) Promise[T] {
 				}
 			}
 
-			// After potential panic is handled, result can be sent to channel
+			// After potential panic is handled, result can be sent to channel.
 			ch <- msg
 			close(ch)
 		}()
