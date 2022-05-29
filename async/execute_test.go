@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime"
 	"sync"
 	"testing"
 
@@ -192,5 +193,48 @@ func TestExecuteHandlesPanicsAndWrapsOriginalError(t *testing.T) {
 	}
 	if res != nil {
 		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+}
+
+func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
+	const dataSize = 1024 * 1024
+	var memStatsBefore, memStatsAfter runtime.MemStats
+	var memUsageDiff uint64
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
+	// Disable parallelism for more predictable results
+	oldGoMaxProcs := runtime.GOMAXPROCS(1)
+	defer runtime.GOMAXPROCS(oldGoMaxProcs)
+
+	// Take initial memory reading (for some reason running GC twice gives more stable resutls)
+	runtime.GC()
+	runtime.GC()
+	runtime.ReadMemStats(&memStatsBefore)
+
+	func() {
+		// Simulate situation when promise is never called
+		_ = async.Execute(func() ([]byte, error) {
+			defer wg.Done()
+			return make([]byte, dataSize), nil
+		})
+
+		wg.Wait()
+	}()
+
+	// Take final memory reading (for some reason running GC twice gives more stable resutls)
+	runtime.GC()
+	runtime.GC()
+	runtime.ReadMemStats(&memStatsAfter)
+
+	if memStatsBefore.HeapInuse > memStatsAfter.HeapInuse {
+		memUsageDiff = memStatsBefore.HeapInuse - memStatsAfter.HeapInuse
+	} else {
+		memUsageDiff = memStatsAfter.HeapInuse - memStatsBefore.HeapInuse
+	}
+
+	if memUsageDiff != 0 {
+		t.Errorf("Memory usage diff is greater than 0: %d", memUsageDiff)
 	}
 }
