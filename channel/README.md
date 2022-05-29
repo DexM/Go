@@ -5,7 +5,7 @@
 
 Helpers for easier work with channels.
 
-:warning: **WARNING:** This packatge is work in progress, do not use it yet :warning:
+:warning: **WARNING:** This package is work in progress, do not use it yet :warning:
 
 ## Installation
 

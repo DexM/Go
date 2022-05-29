@@ -5,7 +5,7 @@ import (
 )
 
 // Consume channel concurrently.
-// Concurrency must be greater than 0, but it makes no sence to have it less than 2.
+// Concurrency must be greater than 0, but it makes no sense to have it less than 2.
 // You must close input channel for error channel to be closed.
 func Consume[T any](
 	ctx context.Context,

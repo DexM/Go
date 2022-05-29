@@ -204,17 +204,17 @@ func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
 
 	wg.Add(1)
 
-	// Disable parallelism for more predictable results
+	// Disable parallelism for more predictable results.
 	oldGoMaxProcs := runtime.GOMAXPROCS(1)
 	defer runtime.GOMAXPROCS(oldGoMaxProcs)
 
-	// Take initial memory reading (for some reason running GC twice gives more stable resutls)
+	// Take initial memory reading (for some reason running GC twice gives more stable results).
 	runtime.GC()
 	runtime.GC()
 	runtime.ReadMemStats(&memStatsBefore)
 
 	func() {
-		// Simulate situation when promise is never called
+		// Simulate situation when promise is never called.
 		_ = async.Execute(func() ([]byte, error) {
 			defer wg.Done()
 			return make([]byte, dataSize), nil
@@ -223,7 +223,7 @@ func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
 		wg.Wait()
 	}()
 
-	// Take final memory reading (for some reason running GC twice gives more stable resutls)
+	// Take final memory reading (for some reason running GC twice gives more stable results).
 	runtime.GC()
 	runtime.GC()
 	runtime.ReadMemStats(&memStatsAfter)

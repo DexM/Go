@@ -80,11 +80,11 @@ func TestMergeDoesNotLeakGoroutines(t *testing.T) {
 	var memStatsBefore, memStatsAfter runtime.MemStats
 	var memUsageDiff uint64
 
-	// Disable parallelism for more predictable results
+	// Disable parallelism for more predictable results.
 	oldGoMaxProcs := runtime.GOMAXPROCS(1)
 	defer runtime.GOMAXPROCS(oldGoMaxProcs)
 
-	// Take initial memory reading (for some reason running GC twice gives more stable resutls)
+	// Take initial memory reading (for some reason running GC twice gives more stable results).
 	runtime.GC()
 	runtime.GC()
 	runtime.ReadMemStats(&memStatsBefore)
@@ -100,10 +100,10 @@ func TestMergeDoesNotLeakGoroutines(t *testing.T) {
 
 		chRes := channel.Merge(ctx, chInput)
 		<-chRes
-		// Do not drain channel fully, leave 2nd message in the channel
+		// Do not drain channel fully, leave 2nd message in the channel.
 	}()
 
-	// Take final memory reading (for some reason running GC twice gives more stable resutls)
+	// Take final memory reading (for some reason running GC twice gives more stable results).
 	runtime.GC()
 	runtime.GC()
 	runtime.ReadMemStats(&memStatsAfter)
