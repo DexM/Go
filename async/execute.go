@@ -11,7 +11,7 @@ type executeChannelMessageType[T any] struct {
 
 // Execute function f asynchronously.
 // Returns promise which can be called to retrieve function's f result.
-// Calling promise will block execution until function f returns.
+// Calling promise will block execution until function f returns result.
 // It is advisable to use context to cancel function's f execution (see example code).
 func Execute[T any](f func() (T, error)) PromiseWithError[T] {
 	// This channel is buffered. It will be written to only once.
@@ -19,11 +19,16 @@ func Execute[T any](f func() (T, error)) PromiseWithError[T] {
 	ch := make(chan executeChannelMessageType[T], 1)
 
 	go func() {
-		var msg executeChannelMessageType[T]
+		// Make sure channel is always closed when asynchronous function completes.
+		defer close(ch)
 
+		// Make sure result message is always sent to a promise.
+		var msg executeChannelMessageType[T]
+		defer func() { ch <- msg }()
+
+		// Make sure panics are handles.
+		// Otherwise caller will receive nothing - neither result, nor error.
 		defer func() {
-			// Panics in goroutines must be handled.
-			// Otherwise caller will receive nothing: no result and no error.
 			if panicArg := recover(); panicArg != nil {
 				if err, ok := panicArg.(error); ok {
 					msg.err = fmt.Errorf("asynchronous function panicked: %w", err)
@@ -31,12 +36,9 @@ func Execute[T any](f func() (T, error)) PromiseWithError[T] {
 					msg.err = fmt.Errorf("asynchronous function panicked: %v", panicArg)
 				}
 			}
-
-			// After potential panic is handled, result can be sent to channel.
-			ch <- msg
-			close(ch)
 		}()
 
+		// Execute function f and store the result and error.
 		res, err := f()
 
 		msg.res = res
