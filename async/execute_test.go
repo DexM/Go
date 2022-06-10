@@ -13,8 +13,6 @@ import (
 	"dexm.lol/async"
 )
 
-var dummyError = errors.New("dummy error")
-
 func ExampleExecute() {
 	promise := async.Execute(func() (string, error) {
 		// Perform some lengthy operation.
@@ -31,37 +29,6 @@ func ExampleExecute() {
 	// Output:
 	// Result: string result of some lengthy operation
 	// Error: <nil>
-}
-
-func ExampleExecute_waitGroups() {
-	// Use wait groups to execute multiple asynchronous functions and read results only when all of them succeeded.
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	promise1 := async.Execute(func() (string, error) {
-		defer wg.Done()
-
-		return "string result", nil
-	})
-
-	promise2 := async.Execute(func() (int, error) {
-		defer wg.Done()
-
-		return 42, nil
-	})
-
-	// Wait for both asynchronous functions to complete before getting results.
-	wg.Wait()
-
-	stringRes, err := promise1()
-	fmt.Printf("Result of 1st asynchronous function: %s. Error: %v\n", stringRes, err)
-
-	intRes, err := promise2()
-	fmt.Printf("Result of 2nd asynchronous function: %d. Error: %v\n", intRes, err)
-
-	// Output:
-	// Result of 1st asynchronous function: string result. Error: <nil>
-	// Result of 2nd asynchronous function: 42. Error: <nil>
 }
 
 func ExampleExecute_context() {
