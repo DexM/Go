@@ -216,3 +216,28 @@ func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
 		t.Errorf("async.Execute function still has goroutine active:\n%s\n", stackTrace)
 	}
 }
+
+func TestExecuteCallingPromiseRepeatedly(t *testing.T) {
+	promise := async.Execute(func() (string, error) {
+		return "dummy result", nil
+	})
+
+	res, err := promise()
+	if res != "dummy result" {
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err != nil {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
+	}
+
+	res, err = promise()
+	if res != "" {
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err == nil {
+		t.Fatal("Expected to receive error from the promise")
+	}
+	if !errors.Is(err, async.ErrPromiseAlreadyExecuted) {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
+	}
+}

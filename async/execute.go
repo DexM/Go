@@ -1,6 +1,7 @@
 package async
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -9,9 +10,18 @@ type executeChannelMessageType[T any] struct {
 	err error
 }
 
+// Predefined errors
+var (
+	ErrPromiseAlreadyExecuted = errors.New("promise was already executed, calling promise multiple times is not supported")
+)
+
 // Execute function f asynchronously.
 // Returns promise which can be called to retrieve function's f result.
 // Calling promise will block execution until function f returns result.
+//
+// Promise can be called only once.
+// Calling promise repeatedly will return error.
+//
 // It is advisable to use context to cancel function's f execution (see example code).
 func Execute[T any](f func() (T, error)) PromiseWithError[T] {
 	// This channel is buffered. It will be written to only once.
@@ -46,7 +56,11 @@ func Execute[T any](f func() (T, error)) PromiseWithError[T] {
 	}()
 
 	return func() (T, error) {
-		msg := <-ch
+		msg, ok := <-ch
+		if !ok {
+			msg.err = ErrPromiseAlreadyExecuted
+		}
+
 		return msg.res, msg.err
 	}
 }
