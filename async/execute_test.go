@@ -47,7 +47,7 @@ func ExampleExecute_waitGroups() {
 		return 42, nil
 	})
 
-	// Wait for both asynchronous function to complete before getting results.
+	// Wait for both asynchronous functions to complete before getting results.
 	wg.Wait()
 
 	stringRes, err := promise1()
