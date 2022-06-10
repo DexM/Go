@@ -94,7 +94,7 @@ func ExampleExecute_context() {
 	// Error: <nil>
 }
 
-func TestExecutePassesResultToPromise(t *testing.T) {
+func TestExecute_passesResultToPromise(t *testing.T) {
 	promise := async.Execute(func() (string, error) {
 		return "dummy result", nil
 	})
@@ -108,7 +108,7 @@ func TestExecutePassesResultToPromise(t *testing.T) {
 	}
 }
 
-func TestExecutePassesErrorToPromise(t *testing.T) {
+func TestExecute_passesErrorToPromise(t *testing.T) {
 	promise := async.Execute(func() (interface{}, error) {
 		return nil, dummyError
 	})
@@ -125,7 +125,7 @@ func TestExecutePassesErrorToPromise(t *testing.T) {
 	}
 }
 
-func TestExecutePassesResultAndErrorToPromiseAtTheSameTime(t *testing.T) {
+func TestExecute_passesResultAndErrorToPromiseAtTheSameTime(t *testing.T) {
 	promise := async.Execute(func() (string, error) {
 		return "dummy result", dummyError
 	})
@@ -142,7 +142,7 @@ func TestExecutePassesResultAndErrorToPromiseAtTheSameTime(t *testing.T) {
 	}
 }
 
-func TestExecuteLaunchesAsync(t *testing.T) {
+func TestExecute_launchesAsync(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -162,7 +162,7 @@ func TestExecuteLaunchesAsync(t *testing.T) {
 	}
 }
 
-func TestExecuteHandlesPanics(t *testing.T) {
+func TestExecute_handlesPanics(t *testing.T) {
 	promise := async.Execute(func() (interface{}, error) {
 		panic("panic happened")
 	})
@@ -179,7 +179,7 @@ func TestExecuteHandlesPanics(t *testing.T) {
 	}
 }
 
-func TestExecuteHandlesPanicsAndWrapsOriginalError(t *testing.T) {
+func TestExecute_handlesPanicsAndWrapsOriginalError(t *testing.T) {
 	promise := async.Execute(func() (interface{}, error) {
 		panic(dummyError)
 	})
@@ -196,7 +196,7 @@ func TestExecuteHandlesPanicsAndWrapsOriginalError(t *testing.T) {
 	}
 }
 
-func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
+func TestExecute_doesNotLeakGoroutines(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -217,7 +217,7 @@ func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
 	}
 }
 
-func TestExecuteCallingPromiseRepeatedly(t *testing.T) {
+func TestExecute_callingPromiseRepeatedlyReturnsError(t *testing.T) {
 	promise := async.Execute(func() (string, error) {
 		return "dummy result", nil
 	})
