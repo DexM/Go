@@ -4,11 +4,7 @@ import (
 	"fmt"
 )
 
-// Promise is a function returned by async.Execute function.
-// It can be called later to retrieve result of asynchronous execution.
-type Promise[T any] func() (T, error)
-
-type executeChMessageType[T any] struct {
+type executeChannelMessageType[T any] struct {
 	res T
 	err error
 }
@@ -17,13 +13,13 @@ type executeChMessageType[T any] struct {
 // Returns promise which can be called to retrieve function's f result.
 // Calling promise will block execution until function f returns.
 // It is advisable to use context to cancel function's f execution (see example code).
-func Execute[T any](f func() (T, error)) Promise[T] {
+func Execute[T any](f func() (T, error)) PromiseWithError[T] {
 	// This channel is buffered. It will be written to only once.
 	// That way when function f completes, goroutine will end as well (even if promise is never called and channel not drained).
-	ch := make(chan executeChMessageType[T], 1)
+	ch := make(chan executeChannelMessageType[T], 1)
 
 	go func() {
-		var msg executeChMessageType[T]
+		var msg executeChannelMessageType[T]
 
 		defer func() {
 			// Panics in goroutines must be handled.
