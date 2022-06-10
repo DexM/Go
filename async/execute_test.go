@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"strings"
 	"sync"
 	"testing"
 
@@ -197,44 +198,22 @@ func TestExecuteHandlesPanicsAndWrapsOriginalError(t *testing.T) {
 }
 
 func TestExecuteDoesNotLeakGoroutines(t *testing.T) {
-	const dataSize = 1024 * 1024
-	var memStatsBefore, memStatsAfter runtime.MemStats
-	var memUsageDiff uint64
 	var wg sync.WaitGroup
-
 	wg.Add(1)
 
-	// Disable parallelism for more predictable results.
-	oldGoMaxProcs := runtime.GOMAXPROCS(1)
-	defer runtime.GOMAXPROCS(oldGoMaxProcs)
+	// Simulate situation when promise is never called.
+	_ = async.Execute(func() (string, error) {
+		defer wg.Done()
+		return "string result", nil
+	})
 
-	// Take initial memory reading (for some reason running GC twice gives more stable results).
-	runtime.GC()
-	runtime.GC()
-	runtime.ReadMemStats(&memStatsBefore)
+	wg.Wait()
 
-	func() {
-		// Simulate situation when promise is never called.
-		_ = async.Execute(func() ([]byte, error) {
-			defer wg.Done()
-			return make([]byte, dataSize), nil
-		})
+	buff := make([]byte, 1024*1024)
+	length := runtime.Stack(buff, true)
+	stackTrace := string(buff[:length])
 
-		wg.Wait()
-	}()
-
-	// Take final memory reading (for some reason running GC twice gives more stable results).
-	runtime.GC()
-	runtime.GC()
-	runtime.ReadMemStats(&memStatsAfter)
-
-	if memStatsBefore.HeapInuse > memStatsAfter.HeapInuse {
-		memUsageDiff = memStatsBefore.HeapInuse - memStatsAfter.HeapInuse
-	} else {
-		memUsageDiff = memStatsAfter.HeapInuse - memStatsBefore.HeapInuse
-	}
-
-	if memUsageDiff != 0 {
-		t.Errorf("Memory usage diff is greater than 0: %d", memUsageDiff)
+	if strings.Contains(stackTrace, "dexm.lol/async.Execute[...].") {
+		t.Errorf("async.Execute function still has goroutine active:\n%s\n", stackTrace)
 	}
 }
