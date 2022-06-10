@@ -5,8 +5,11 @@ jobs:
     name: Test dexm.lol/${{ matrix.module }} on Go ${{ matrix.go }}
     strategy:
       matrix:
-        go: ["1.18"]
-        module: [async, channel]
+        go:
+          - "1.18"
+        module:
+          - async
+          - channel
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
