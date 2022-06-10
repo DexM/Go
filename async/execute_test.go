@@ -13,6 +13,8 @@ import (
 	"dexm.lol/async"
 )
 
+var dummyError = errors.New("dummy error")
+
 func ExampleExecute() {
 	promise := async.Execute(func() (string, error) {
 		// Perform some lengthy operation.
@@ -98,45 +100,45 @@ func TestExecutePassesResultToPromise(t *testing.T) {
 	})
 
 	res, err := promise()
-	if err != nil {
-		t.Errorf("Unexpected error received from the promise: %s", err.Error())
-	}
 	if res != "dummy result" {
-		t.Errorf("Unexpected result received from the promise: %s", res)
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err != nil {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
 	}
 }
 
 func TestExecutePassesErrorToPromise(t *testing.T) {
 	promise := async.Execute(func() (interface{}, error) {
-		return nil, errors.New("dummy error")
+		return nil, dummyError
 	})
 
 	res, err := promise()
-	if err == nil {
-		t.Error("Expected to receive error from the promise")
-	}
-	if err.Error() != "dummy error" {
-		t.Errorf("Unexpected error received from the promise: %s", err.Error())
-	}
 	if res != nil {
 		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err == nil {
+		t.Fatal("Expected to receive error from the promise")
+	}
+	if !errors.Is(err, dummyError) {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
 	}
 }
 
 func TestExecutePassesResultAndErrorToPromiseAtTheSameTime(t *testing.T) {
 	promise := async.Execute(func() (string, error) {
-		return "dummy result", errors.New("dummy error")
+		return "dummy result", dummyError
 	})
 
 	res, err := promise()
-	if err == nil {
-		t.Error("Expected to receive error from the promise")
-	}
-	if err.Error() != "dummy error" {
-		t.Errorf("Unexpected error received from the promise: %s", err.Error())
-	}
 	if res != "dummy result" {
-		t.Errorf("Unexpected result received from the promise: %s", res)
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err == nil {
+		t.Fatal("Expected to receive error from the promise")
+	}
+	if !errors.Is(err, dummyError) {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
 	}
 }
 
@@ -152,11 +154,11 @@ func TestExecuteLaunchesAsync(t *testing.T) {
 	wg.Wait()
 
 	res, err := promise()
-	if err != nil {
-		t.Errorf("Unexpected error received from the promise: %s", err.Error())
-	}
 	if res != "dummy result" {
-		t.Errorf("Unexpected result received from the promise: %s", res)
+		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err != nil {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
 	}
 }
 
@@ -166,34 +168,31 @@ func TestExecuteHandlesPanics(t *testing.T) {
 	})
 
 	res, err := promise()
-	if err == nil {
-		t.Error("Expected to receive error from the promise")
-	}
-	if err.Error() != "asynchronous function panicked: panic happened" {
-		t.Errorf("Unexpected error received from the promise: %s", err.Error())
-	}
 	if res != nil {
 		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err == nil {
+		t.Fatal("Expected to receive error from the promise")
+	}
+	if !strings.HasSuffix(err.Error(), ": panic happened") {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
 	}
 }
 
 func TestExecuteHandlesPanicsAndWrapsOriginalError(t *testing.T) {
 	promise := async.Execute(func() (interface{}, error) {
-		panic(errors.New("panic happened"))
+		panic(dummyError)
 	})
 
 	res, err := promise()
-	if err == nil {
-		t.Error("Expected to receive error from the promise")
-	}
-	if err.Error() != "asynchronous function panicked: panic happened" {
-		t.Errorf("Unexpected error received from the promise: %s", err.Error())
-	}
-	if originalErr := errors.Unwrap(err); originalErr == nil || originalErr.Error() != "panic happened" {
-		t.Errorf("Original error was not properly wrapped: %#v", originalErr)
-	}
 	if res != nil {
 		t.Errorf("Unexpected result received from the promise: %#v", res)
+	}
+	if err == nil {
+		t.Fatal("Expected to receive error from the promise")
+	}
+	if !errors.Is(err, dummyError) {
+		t.Errorf("Unexpected error received from the promise: %#v", err)
 	}
 }
 
