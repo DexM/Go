@@ -7,6 +7,7 @@ jobs:
       matrix:
         go:
           - "1.18"
+          - "1.19"
         version:
           - "v0.0.1"
           - "v0.0.2"
@@ -29,6 +30,7 @@ jobs:
       matrix:
         go:
           - "1.18"
+          - "1.19"
         version:
           - latest
     runs-on: ubuntu-latest

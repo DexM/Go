@@ -7,6 +7,7 @@ jobs:
       matrix:
         go:
           - "1.18"
+          - "1.19"
         module:
           - async
           - channel
